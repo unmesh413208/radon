@@ -1,8 +1,10 @@
 const express = require('express');
 const myHelper = require('../util/helper')
 const underscore = require('underscore')
+const lodash = require('lodash')
 
 const router = express.Router();
+// const app = express.application();
 
 router.get('/test-me', function (req, res) {
     myHelper.printDate()
@@ -10,13 +12,10 @@ router.get('/test-me', function (req, res) {
     myHelper.getCohortData()
     let firstElement = underscore.first(['Sabiha','Akash','Pritesh'])
     console.log('The first element received from underscope function is '+firstElement)
-    res.send('My first ever api!')
+    res.send('My first ever api hahaha!')
 });
 
-router.get('/hello', function (req, res) {
-   
-    res.send('Hello there!')
-});
+
 
 router.get('/candidates', function(req, res){
     console.log('Query paramters for this request are '+JSON.stringify(req.query))
@@ -30,12 +29,30 @@ router.get('/candidates', function(req, res){
     res.send(candidates)
 })
 
-router.get('/candidates/:canidatesName', function(req, res){
+router.get('/candidates/:Candidatename', function(req, res){
     console.log('The request objects is '+ JSON.stringify(req.params))
     console.log('Candidates name is '+req.params.canidatesName)
     res.send('Done')
 })
 
 
+// app.get("/sol1", function (req, res) {
+//     //logic : sum of numbers is n(n+1)/2..so get sum of all numbers in array. now take sum of numbers till last digit in the array
+//     let arr= [1,2,3,5,6,7]
+//     let n = (n*n+1)/2
+//     let sum = 0
+
+//     let missingNumber = n - sum
+    
+//     for(let i=0;i<arr.length;i++){
+//         sum = sum + i
+//     }
+//     console.log("missing " + missingNumber );
+
+//     ///LOGIC WILL GO HERE 
+//     res.send(  { data: missingNumber  }  );
+// });
+
 module.exports = router;
+// module.exports = app;
 // adding this comment for no reason
