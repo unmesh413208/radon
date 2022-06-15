@@ -42,7 +42,11 @@ const loginUser = async function (req, res) {
   res.send({ status: true, token: token });
 };
 
+//------------------------------------------------------------------------------
+
+
 const getUserData = async function (req, res) {
+//>>>>>>>>>>Token Check
   let token = req.headers["x-Auth-token"];
   if (!token) token = req.headers["x-auth-token"];
 
@@ -50,7 +54,7 @@ const getUserData = async function (req, res) {
   if (!token) return res.send({ status: false, msg: "token must be present" });
 
   console.log(token);
-
+//>>>>>>>>>>>>>Validation
   // If a token is present then decode the token with verify function
   // verify takes two inputs:
   // Input 1 is the token to be decoded
@@ -60,6 +64,16 @@ const getUserData = async function (req, res) {
   if (!decodedToken)
     return res.send({ status: false, msg: "token is invalid" });
 
+//>>>>>>>>>>>>>>>>Authorisation
+  let userToBeModified = req.params.userId
+  //userId for the logged-in user
+  let userLoggedIn = decodedToken.userId
+
+  //userId comparision to check if the logged-in user is requesting for their own data
+  if (userToBeModified != userLoggedIn) return res.send({ status: false, msg: 'User logged is not allowed to modify the requested users data' })
+
+//>>>>>>>>>>>>>>>>
+
   let userId = req.params.userId;
   let userDetails = await userModel.findById(userId);
   if (!userDetails)
@@ -68,7 +82,14 @@ const getUserData = async function (req, res) {
   res.send({ status: true, data: userDetails });
 };
 
+
+
+
+//-----------------------------------------------------------------------
+
 const updateUser = async function (req, res) {
+
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>Token Check
   // Do the same steps here:
   // Check if the token is present
   // Check if the token present is a valid token
@@ -78,10 +99,27 @@ const updateUser = async function (req, res) {
 
   if (!token) return res.send({ status: false, msg: "token must be present" });
 
-  let decodedToken = jwt.verify(token, "functionup-thorium");
+
+
+//>>>>>>>>>>>>>>>>>Validation
+  let decodedToken = jwt.verify(token, "functionup-radon");
   if (!decodedToken)
     return res.send({ status: false, msg: "token is invalid" });
 
+
+
+//>>>>>>>>>>>>>>>>>>>Authorisation    
+
+let userToBeModified = req.params.userId
+  //userId for the logged-in user
+  let userLoggedIn = decodedToken.userId
+
+  //userId comparision to check if the logged-in user is requesting for their own data
+  if (userToBeModified != userLoggedIn) return res.send({ status: false, msg: 'User logged is not allowed to modify the requested users data' })
+
+
+
+//>>>>>>>>>>>>>>>>>>>>>>>>
 
   let userId = req.params.userId;
   let user = await userModel.findById(userId);
@@ -91,27 +129,37 @@ const updateUser = async function (req, res) {
     return res.send("No such user exists");
   }
 
-  //let userData = req.body;
-  //console.log(userData);  
+
   let updatedUser = await userModel.findOneAndUpdate(
-    { _id: userId, isDeleted: false },
+    { _id: userId },
     { $set: req.body },
     { new: true }
   );
-  //const updatedUser= await userModel.findOneAndUpdate({_id:userId,isDeleted:true},{$set: req.body},{new:true})
+  
   res.send({ status: true, data: updatedUser });
 };
 
 
-const deleteUser = async function (req,res) {
+const deleteUser = async function (req, res) {
+
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>Authorisation
+
+  let userToBeModified = req.params.userId
+  //userId for the logged-in user
+  let userLoggedIn = decodedToken.userId
+
+  //userId comparision to check if the logged-in user is requesting for their own data
+  if (userToBeModified != userLoggedIn) return res.send({ status: false, msg: 'User logged is not allowed to modify the requested users data' })
+
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   const userId = req.params.userId;
   const deletedUser = await userModel.findOneAndUpdate(
-    {_id:userId},
-    {$set: {isDeleted:true}}
-    )
+    { _id: userId },
+    { $set: { isDeleted: true } }
+  )
 
 
-  res.send({status:true,msg:"user deleted"})
+  res.send({ status: true, msg: "user deleted" })
 }
 
 module.exports.deleteUser = deleteUser
